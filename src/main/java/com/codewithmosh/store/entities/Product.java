@@ -31,21 +31,17 @@ public class Product {
     
     @ManyToOne
     private Category category;
-    
-    @ManyToOne
-    private User user;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String description, String code, BigDecimal price, Category category, User user) {
+    public Product(Long id, String name, String description, String code, BigDecimal price, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.code = code;
         this.price = price;
         this.category = category;
-        this.user = user;
     }
 
     public Long getId() {
@@ -95,14 +91,5 @@ public class Product {
     public void setCategory(Category category) {
         this.category = category;
     }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-    
     
 }
