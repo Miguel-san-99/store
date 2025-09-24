@@ -5,9 +5,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -26,20 +28,27 @@ public class Product {
     @Column(name = "code")
     private String code;
     
+    @Column(name = "stock")
+    private int stock;
+    
     @Column(name = "price")
     private BigDecimal price;
     
     @ManyToOne
     private Category category;
+    
+    @ManyToMany(mappedBy="carrito")
+    private Set<User> users;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String description, String code, BigDecimal price, Category category) {
+    public Product(Long id, String name, String description, String code, int stock, BigDecimal price, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.code = code;
+        this.stock = stock;
         this.price = price;
         this.category = category;
     }
@@ -74,6 +83,14 @@ public class Product {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public BigDecimal getPrice() {
