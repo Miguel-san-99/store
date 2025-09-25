@@ -32,10 +32,10 @@ public class User {
     @Column(name = "password")
     private String password;
     
-    @OneToMany(mappedBy="user", targetEntity = Address.class, cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = Address.class, mappedBy="user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Address> addresses;
     
-    @ManyToMany
+    @ManyToMany(targetEntity = Product.class, fetch = FetchType.LAZY)
     @JoinTable(name = "carrito",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")

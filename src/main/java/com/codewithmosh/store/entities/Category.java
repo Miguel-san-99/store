@@ -20,7 +20,7 @@ public class Category {
     @Column(name = "name")
     private String name;
     
-    @OneToMany(mappedBy = "category")
+    @OneToMany(targetEntity = Product.class, mappedBy = "category")
     private Set<Product> products;
 
     public Category() {

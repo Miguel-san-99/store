@@ -1,5 +1,6 @@
 package com.codewithmosh.store.entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,16 +35,16 @@ public class Product {
     @Column(name = "price")
     private BigDecimal price;
     
-    @ManyToOne
+    @ManyToOne(targetEntity = Category.class, cascade = CascadeType.PERSIST)
     private Category category;
     
-    @ManyToMany(mappedBy="carrito")
+    @ManyToMany(targetEntity = User.class, mappedBy="carrito")
     private Set<User> users;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String description, String code, int stock, BigDecimal price, Category category) {
+    public Product(Long id, String name, String description, String code, int stock, BigDecimal price, Category category, Set<User> users) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -51,6 +52,7 @@ public class Product {
         this.stock = stock;
         this.price = price;
         this.category = category;
+        this.users = users;
     }
 
     public Long getId() {
@@ -108,5 +110,12 @@ public class Product {
     public void setCategory(Category category) {
         this.category = category;
     }
-    
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
 }
