@@ -2,11 +2,15 @@ package com.codewithmosh.store.controllers;
 
 import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.entities.User;
+import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import java.util.Set;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -14,14 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
     
     @GetMapping
-    public Iterable<UserDto> getAllUsers(){
-        return userRepository.findAll().stream().map(user -> new UserDto(user.getId(), user.getName(), user.getEmail())).toList();
+    public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "") String sort){
+        if (!Set.of("id", "name", "email").contains(sort))
+            sort = "name";
+        return userRepository.findAll(Sort.by(sort)).stream().map(userMapper::toDto).toList();
     }
     
     @GetMapping("/{id}")
@@ -30,7 +38,6 @@ public class UserController {
         if (user == null){
             return ResponseEntity.notFound().build();
         }
-        UserDto userDto = new UserDto(user.getId(), user.getName(), user.getEmail());
-        return ResponseEntity.ok(userDto);
+        return ResponseEntity.ok(userMapper.toDto(user));
     }
 }
