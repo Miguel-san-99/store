@@ -1,10 +1,10 @@
 package com.codewithmosh.store.controllers;
 
 import com.codewithmosh.store.dtos.ProductDto;
-import com.codewithmosh.store.entities.Product;
 import com.codewithmosh.store.mappers.ProductMapper;
 import com.codewithmosh.store.repositories.CategoryRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
+import com.codewithmosh.store.services.ProductService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,69 +24,56 @@ public class ProductController {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
+    private final ProductService productService;
 
-    public ProductController(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository) {
+    public ProductController(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository, ProductService productService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.categoryRepository = categoryRepository;
+        this.productService = productService;
     }
     
     @GetMapping
-    public Iterable<ProductDto> getAllProducts(@RequestParam(required = false, defaultValue = "") String filter){
-        List<Product> products = filter.isEmpty() ? productRepository.findAllWithCategory(): productRepository.findByCategoryId(Long.valueOf(filter));
-        return products.stream().map(productMapper::toDto).toList();
+    public List<ProductDto> getAllProducts(@RequestParam(required = false, defaultValue = "") String filter){
+        
+        List<ProductDto> products = productService.getAllProducts(filter);
+        return products;
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable Long id){
-        Product product = productRepository.findById(id).orElse(null);
-        if (product == null){
+    public ResponseEntity<ProductDto> getProductById(@PathVariable Long id){
+        ProductDto productDto = productService.getProductById(id);
+        if (productDto == null){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(productMapper.toDto(product));
+        return ResponseEntity.ok(productDto);
     }
     
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto request,
-                                                                                            UriComponentsBuilder uriBuilder){
-        var category = categoryRepository.findById(request.getCategoryId()).orElse(null);
-        if (category == null){
-            return ResponseEntity.badRequest().build();
-        }
-        var product = productMapper.toEntity(request);
-        product.setCategory(category);
-        productRepository.save(product);
-        request.setId(product.getId());
-        var uri = uriBuilder.path("/products/{id}").buildAndExpand(product.getId()).toUri();
+                                                    UriComponentsBuilder uriBuilder){
+        ProductDto productDto = productService.createProduct(request);
+        var uri = uriBuilder.path("/products/{id}").buildAndExpand(productDto.getId()).toUri();
         return ResponseEntity.created(uri).body(request);
     }
     
     @PutMapping("{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable(name = "id") Long id,
-                                                                                            @RequestBody ProductDto request){
-        var product = productRepository.findById(id).orElse(null);
-        if (product == null){
+                                                    @RequestBody ProductDto request){
+        ProductDto productDto = productService.updateProduct(id, request);
+        if (productDto == null){
             return ResponseEntity.notFound().build();
         }
-        var category = categoryRepository.findById(request.getCategoryId()).orElse(null);
-        if (category == null){
-            return ResponseEntity.badRequest().build();
-        }
-        productMapper.update(request, product);
-        product.setCategory(category);
-        productRepository.save(product);
-        request.setId(product.getId());
         
         return ResponseEntity.ok(request);
     }
     
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable(name = "id") Long id){
-        var product = productRepository.findById(id).orElse(null);
-        if (product == null){
+        boolean deleted = productService.deleteProduct(id);
+        if (!deleted){
             return ResponseEntity.notFound().build();
         }
-        productRepository.delete(product);
         return ResponseEntity.noContent().build();
     }
 }

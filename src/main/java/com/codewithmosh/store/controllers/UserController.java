@@ -4,11 +4,9 @@ import com.codewithmosh.store.dtos.ChangePasswordRequest;
 import com.codewithmosh.store.dtos.RegisterUserRequest;
 import com.codewithmosh.store.dtos.UpdateUserRequest;
 import com.codewithmosh.store.dtos.UserDto;
-import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.mappers.UserMapper;
-import com.codewithmosh.store.repositories.UserRepository;
-import java.util.Set;
-import org.springframework.data.domain.Sort;
+import com.codewithmosh.store.services.UserService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,37 +24,34 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/users")
 public class UserController {
     
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final UserMapper userMapper;
 
-    public UserController(UserRepository userRepository, UserMapper userMapper) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService, UserMapper userMapper) {
+        this.userService = userService;
         this.userMapper = userMapper;
     }
     
     @GetMapping
-    public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "") String sort){
-        if (!Set.of("id", "name", "email").contains(sort))
-            sort = "name";
-        return userRepository.findAll(Sort.by(sort)).stream().map(userMapper::toDto).toList();
+    public ResponseEntity<List<UserDto>> getAllUsers(@RequestParam(required = false, defaultValue = "") String sort){
+        List<UserDto> users = userService.getAllUsers(sort);
+        return ResponseEntity.ok(users);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id){
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null){
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id){
+        UserDto user = userService.getUserById(id);
+        if(user == null){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(userMapper.toDto(user));
+        return ResponseEntity.ok(user);
     }
     
     @PostMapping
     public ResponseEntity<UserDto> createUser(
             @RequestBody RegisterUserRequest request,
             UriComponentsBuilder uriBuilder){
-        User user = userMapper.toEntity(request);
-        userRepository.save(user);
-        UserDto userDto = userMapper.toDto(user);
+        UserDto userDto = userService.createUser(request);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto);
     }
@@ -64,38 +59,34 @@ public class UserController {
     @PostMapping("/{id}/change-password")
     public ResponseEntity<Void> changePassword(@PathVariable(name = "id") Long id,
                                                 @RequestBody ChangePasswordRequest request){
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null){
-            return ResponseEntity.notFound().build();
-        }
-        if (!user.getPassword().equals(request.getOldPassword())){
+        try{
+            boolean success = userService.changePassword(id, request);
+            if (!success){
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
+        }catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        user.setPassword(request.getNewPassword());
-        userRepository.save(user);
-        
-        return ResponseEntity.noContent().build();
     }
+    
     
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable(name = "id") Long id,
                                                     @RequestBody UpdateUserRequest request){
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null){
+        UserDto userDto = userService.updateUser(id, request);
+        if (userDto == null){
             return ResponseEntity.notFound().build();
         }
-        userMapper.update(request, user);
-        userRepository.save(user);
-        return ResponseEntity.ok(userMapper.toDto(user));
+        return ResponseEntity.ok(userDto);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable(name = "id") Long id){
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null){
+        boolean deleted = userService.deleteUser(id);
+        if (!deleted){
             return ResponseEntity.notFound().build();
         }
-        userRepository.delete(user);
         return ResponseEntity.noContent().build();
     }
 }
