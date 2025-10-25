@@ -9,14 +9,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,18 +43,18 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
     
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
     
     @OneToMany(targetEntity = Address.class, mappedBy="user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Address> addresses;
     
-    @ManyToMany(targetEntity = Product.class, fetch = FetchType.LAZY)
-    @JoinTable(name = "carrito",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
-    private Set<Product> carrito;
+    @OneToOne(targetEntity = Cart.class, mappedBy = "user")
+    private Cart cart;
+    
+    @OneToMany(targetEntity = Order.class, mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<Order> order;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -7,11 +7,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -23,6 +23,9 @@ public class Product {
     
     @Column(name = "name")
     private String name;
+    
+    @OneToMany(targetEntity = Image.class, mappedBy = "product", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private List<Image> image;
     
     @Column(name = "description")
     private String description;
@@ -39,22 +42,22 @@ public class Product {
     @ManyToOne(targetEntity = Category.class, cascade = CascadeType.PERSIST)
     private Category category;
     
-    @ManyToMany(targetEntity = User.class, mappedBy="carrito", fetch = FetchType.LAZY)
-    private Set<User> users;
+    
 
     public Product() {
     }
 
-    public Product(Long id, String name, String description, String code, int stock, BigDecimal price, Category category, Set<User> users) {
+    public Product(Long id, String name, List<Image> image, String description, String code, int stock, BigDecimal price, Category category) {
         this.id = id;
         this.name = name;
+        this.image = image;
         this.description = description;
         this.code = code;
         this.stock = stock;
         this.price = price;
         this.category = category;
-        this.users = users;
     }
+
 
     public Long getId() {
         return id;
@@ -112,11 +115,12 @@ public class Product {
         this.category = category;
     }
 
-    public Set<User> getUsers() {
-        return users;
+    public List<Image> getImage() {
+        return image;
     }
 
-    public void setUsers(Set<User> users) {
-        this.users = users;
+    public void setImage(List<Image> image) {
+        this.image = image;
     }
+    
 }
