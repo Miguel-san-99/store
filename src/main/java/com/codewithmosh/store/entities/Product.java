@@ -24,7 +24,7 @@ public class Product {
     @Column(name = "name")
     private String name;
     
-    @OneToMany(targetEntity = Image.class, mappedBy = "product", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(targetEntity = Image.class, mappedBy = "product", cascade = CascadeType.ALL,orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Image> image;
     
     @Column(name = "description")
