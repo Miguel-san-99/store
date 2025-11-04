@@ -4,7 +4,6 @@ import com.codewithmosh.store.dtos.ChangePasswordRequest;
 import com.codewithmosh.store.dtos.RegisterUserRequest;
 import com.codewithmosh.store.dtos.UpdateUserRequest;
 import com.codewithmosh.store.dtos.UserDto;
-import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.services.UserService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -25,11 +24,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class UserController {
     
     private final UserService userService;
-    private final UserMapper userMapper;
 
-    public UserController(UserService userService, UserMapper userMapper) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userMapper = userMapper;
     }
     
     @GetMapping

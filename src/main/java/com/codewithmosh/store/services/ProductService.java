@@ -18,7 +18,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     public List<ProductDto> getAllProducts(String filter) {
-        List<Product> products = filter.isEmpty() ? productRepository.findAllWithCategory(): productRepository.findByCategoryId(Long.valueOf(filter));
+        List<Product> products = filter.isEmpty() ? productRepository.findAllWithCategory() : productRepository.findByCategoryId(Long.valueOf(filter));
         return products.stream().map(productMapper::toDto).toList();
     }
 
@@ -35,7 +35,8 @@ public class ProductService {
         Product product = productMapper.toEntity(request);
         product.setCategory(category);
         productRepository.save(product);
-        return productMapper.toDto(product);
+        request.setId(product.getId());
+        return request;
     }
 
     public ProductDto updateProduct(Long id, ProductDto request) {

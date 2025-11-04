@@ -21,15 +21,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
-    private final ProductMapper productMapper;
     private final ProductService productService;
 
-    public ProductController(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository, ProductService productService) {
-        this.productRepository = productRepository;
-        this.productMapper = productMapper;
-        this.categoryRepository = categoryRepository;
+    public ProductController(ProductService productService) {
         this.productService = productService;
     }
     
