@@ -4,14 +4,12 @@ import com.codewithmosh.store.dtos.ImageDto;
 import com.codewithmosh.store.entities.Image;
 import com.codewithmosh.store.responses.ApiResponse;
 import com.codewithmosh.store.services.ImageService;
-import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +33,7 @@ public class ImageController {
     public ResponseEntity<ApiResponse> createImages(@RequestParam List<MultipartFile> files, @RequestParam Long productId){
         try{
             List<ImageDto> imagesDto = imageService.createImages(files, productId);
-            return ResponseEntity.ok(new ApiResponse("Upload success!", imagesDto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Upload success!", imagesDto));
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Upload failed!", e.getMessage()));
         }

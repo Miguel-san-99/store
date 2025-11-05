@@ -23,12 +23,19 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
     
-    public Category createCategory(){
-        return null;
+    public Category createCategory(Category request){
+        Category category = categoryRepository.save(request);
+        return category;
     }
     
-    public Category updateCategory(){
-        return null;
+    public Category updateCategory(Category request, Long id){
+        var category = categoryRepository.findById(id).orElse(null);
+        if (category == null){
+            return null;
+        }
+        category.setName(request.getName());
+        categoryRepository.save(category);
+        return category;
     }
     
     public boolean deleteCategoryById(Long id){

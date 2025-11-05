@@ -2,6 +2,7 @@ package com.codewithmosh.store.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +21,7 @@ public class Category {
     @Column(name = "name")
     private String name;
     
-    @OneToMany(targetEntity = Product.class, mappedBy = "category")
+    @OneToMany(targetEntity = Product.class, mappedBy = "category", fetch = FetchType.LAZY)
     private Set<Product> products;
 
     public Category() {
